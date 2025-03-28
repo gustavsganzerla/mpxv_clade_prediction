@@ -21,7 +21,7 @@ def generate_kmers(sequence, k):
 # Create your views here.
 def home(request):
     loaded_model = xgb.XGBClassifier()
-
+    output = []
 
     loaded_model.load_model('/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/xgb_model.json')
     if request.method == 'POST':
@@ -49,8 +49,12 @@ def home(request):
                            clade = '1'
                        else:
                            clade = '2'
+                   output.append({
+                       'ID':record.id,
+                       'Prediction':clade
+                   })
                     
-                   print(f'{record.id}\t{clade}')
+                print(output)
 
 
                    #for kmer in all_kmers:
