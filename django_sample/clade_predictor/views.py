@@ -5,3 +5,6 @@ from django.http import HttpResponse
 
 def test_view(request):
     return HttpResponse('hi')
+
+def home(request):
+    return render(request, 'clade_predictor/home.html')
