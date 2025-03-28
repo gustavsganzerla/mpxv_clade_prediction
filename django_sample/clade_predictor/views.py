@@ -21,6 +21,8 @@ def generate_kmers(sequence, k):
 # Create your views here.
 def home(request):
     loaded_model = xgb.XGBClassifier()
+
+
     loaded_model.load_model('/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/xgb_model.json')
     if request.method == 'POST':
         form = genomeForm(request.POST)
@@ -35,18 +37,48 @@ def home(request):
                
                 for record in SeqIO.parse(StringIO(genome_text), 'fasta'):
                    kmer_counts = generate_kmers(record.seq, 3)
-                   count_row = {'ID': record.id}
+                   features = [kmer_counts.get(kmer, 0) for kmer in all_kmers]
 
-                   for kmer in all_kmers:
-                       count_row[kmer] = kmer_counts.get(kmer, 0)
+                   X = np.array(features).reshape(1,-1)
+                   y_pred_proba = loaded_model.predict_proba(X)
+                   elements = y_pred_proba.tolist()
+                   
+                   for inner_list in elements:
+                       clade = ''
+                       if inner_list[0] > inner_list[1]:
+                           clade = '1'
+                       else:
+                           clade = '2'
+                    
+                   print(f'{record.id}\t{clade}')
+
+
+                   #for kmer in all_kmers:
+                    #   count_row[kmer] = kmer_counts.get(kmer, 0)
+                    
+                   #all_counts.append(count_row)
+                   ##df = pd.DataFrame(all_counts)
+                   #print(df)
+
+                   #for kmer in all_kmers:
+                    #   count_row[kmer] = kmer_counts.get(kmer,0)
+                   #all_counts.append(count_row)
+                    
+                   
+
+                    
+
                 
-                   all_counts.append(count_row)
+                ##df = pd.DataFrame(all_counts)
+                #X = df.iloc[:, 1:].to_numpy()
                 
-                df = pd.DataFrame(all_counts)
-                X = df.iloc[:, 1:].to_numpy()
+                #y_pred_proba = loaded_model.predict_proba(X)
+                #elements = y_pred_proba.tolist()
                 
-                y_pred_proba = loaded_model.predict_proba(X)
-                print(y_pred_proba)
+                #for arr in elements:
+                #    print(arr[0])
+                
+                
                
                
                    
