@@ -56,41 +56,8 @@ def home(request):
                     
                 print(output)
 
-
-                   #for kmer in all_kmers:
-                    #   count_row[kmer] = kmer_counts.get(kmer, 0)
-                    
-                   #all_counts.append(count_row)
-                   ##df = pd.DataFrame(all_counts)
-                   #print(df)
-
-                   #for kmer in all_kmers:
-                    #   count_row[kmer] = kmer_counts.get(kmer,0)
-                   #all_counts.append(count_row)
-                    
-                   
-
-                    
-
-                
-                ##df = pd.DataFrame(all_counts)
-                #X = df.iloc[:, 1:].to_numpy()
-                
-                #y_pred_proba = loaded_model.predict_proba(X)
-                #elements = y_pred_proba.tolist()
-                
-                #for arr in elements:
-                #    print(arr[0])
-                
-                
-               
-               
-                   
-
-
-
-                   
-                       
+                return render(request, 'clade_predictor/results.html', 
+                              context={'output':output})
 
     else:
         form = genomeForm()
