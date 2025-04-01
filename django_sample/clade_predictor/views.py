@@ -23,7 +23,7 @@ def home(request):
     loaded_model = xgb.XGBClassifier()
     output = []
 
-    loaded_model.load_model('/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/xgb_model.json')
+    loaded_model.load_model('/var/www/django_app/django_sample/models/xgb_model.json')
     if request.method == 'POST':
         form = genomeForm(request.POST)
         all_kmers = [''.join(kmer) for kmer in itertools.product('ATCG', repeat=3)]
