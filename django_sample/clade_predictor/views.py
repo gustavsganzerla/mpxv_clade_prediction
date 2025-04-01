@@ -46,9 +46,9 @@ def home(request):
                    for inner_list in elements:
                        clade = ''
                        if inner_list[0] > inner_list[1]:
-                           clade = '1'
+                           clade = 'cladeß1'
                        else:
-                           clade = '2'
+                           clade = 'clade2'
                    output.append({
                        'ID':record.id,
                        'Prediction':clade
