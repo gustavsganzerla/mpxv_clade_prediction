@@ -4,7 +4,27 @@
 
 <div class='content'>
 
-    {{output}}
+    <h1>Results for {{n_seqs}} sequence(s) </h2>
+        <br>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Sequence ID </th>
+                <th>Prediction </th>
+                <th>Sequence Length </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in output %}
+            <tr>
+                <td>{{item.id}}</td>
+                <td>{{item.prediction}}</td>
+                <td>{{item.length}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
 </div>
 
