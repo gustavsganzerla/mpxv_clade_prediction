@@ -34,14 +34,18 @@ def home(request):
 
     
     if request.method == 'POST':
-        form = genomeForm(request.POST)
+        form = genomeForm(request.POST, request.FILES)
         all_kmers = [''.join(kmer) for kmer in itertools.product('ATCG', repeat=3)]
 
         if form.is_valid():
             collected_data = form.cleaned_data
             genome_text = collected_data.get('genome_text')
+            uploaded_file = collected_data.get('uploaded_file')
             all_counts = []
+            print(collected_data)
 
+
+            ###here I am getting data from the text box in the website
             if genome_text:
                
                 for record in SeqIO.parse(StringIO(genome_text), 'fasta'):
@@ -81,6 +85,48 @@ def home(request):
                               context={'output':output,
                                        'n_seqs':n_seqs})
 
+            
+            if uploaded_file:
+                print(uploaded_file)
+                uploaded_file_data = uploaded_file.read().decode('utf-8')
+                uploaded_file_io = StringIO(uploaded_file_data)
+
+                for record in SeqIO.parse(uploaded_file_io, 'fasta'):
+                    n_seqs +=1
+                    kmer_counts = generate_kmers(record.seq, 3)
+                    features = [kmer_counts.get(kmer, 0) for kmer in all_kmers]
+
+                    X = np.array(features).reshape(1,-1)
+
+                    
+                    y_pred_proba = model_clade.predict_proba(X)
+                    elements = y_pred_proba.tolist()
+                    
+                    for inner_list in elements:
+                        clade = ''
+                        if inner_list[0] > inner_list[1]:
+                            clade = 'Clade 1'
+                            y_pred_proba = model_subclade.predict_proba(X)
+                            elements_subclade = y_pred_proba.tolist()
+
+                            for inner_list_subclade in elements_subclade:
+                                if inner_list_subclade[0] > inner_list_subclade[1]:
+                                    clade += 'a'
+                                else:
+                                    clade += 'b'
+                        else:
+                            clade = 'Clade 2b'
+                    output.append({
+                        'id':record.id,
+                        'prediction':clade,
+                        'length':len(record.seq)
+                    })
+                        
+                    
+
+                    return render(request, 'clade_predictor/results.html', 
+                                context={'output':output,
+                                        'n_seqs':n_seqs})
     else:
         form = genomeForm()
 
