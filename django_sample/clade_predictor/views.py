@@ -87,7 +87,6 @@ def home(request):
 
             
             if uploaded_file:
-                print(uploaded_file)
                 uploaded_file_data = uploaded_file.read().decode('utf-8')
                 uploaded_file_io = StringIO(uploaded_file_data)
 
@@ -129,9 +128,6 @@ def home(request):
                                         'n_seqs':n_seqs})
     else:
         form = genomeForm()
-
-        
-
 
 
 
