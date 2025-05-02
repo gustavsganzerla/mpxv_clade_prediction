@@ -6,48 +6,103 @@
 
 
 <style>
-    .content-rectangle {
-        border: 2px dashed #ccc; 
-        background-color: rgba(255, 255, 255, 0.5); 
-        padding: 10px; 
-        border-radius: 10px; 
-        width: fit-content; 
-        margin: 10px 0; 
-    }
-    .submit-button {
-        background-color: #4ac4cf; 
-        border: none; 
-        color: black; 
-        padding: 15px 32px; 
-        text-align: center; 
-        text-decoration: none; 
-        display: inline-block; 
-        font-size: 16px;
-        margin: 4px 2px; 
-        cursor: pointer; 
-        border-radius: 8px; 
-      }
-      
-      .submit-button:hover {
-        background-color: #3fabb5; 
-      }
 
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        max-width: 800px;
-        margin: 0;  /* Set left margin to 0 */
-    }
 
-    th, td {
-        border: 1px solid #dddddd;
-        text-align: left;
-        padding: 8px;
-    }
+.submit-button {
+  background-color: #4ac4cf;
+  border: none;
+  color: black;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 8px;
+}
 
-    th {
-        background-color: #f2f2f2;
-    }
+.submit-button:hover {
+  background-color: #3fabb5;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 800px;
+  margin: 0;
+}
+
+th, td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+.content-rectangle {
+    border: 2px dashed #ccc;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+    width: 500px;
+    margin: 20px 0;
+    float: left; /* Aligns to the left of the screen */
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  #drop-area {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s ease;
+  }
+  
+  #drop-area p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  #drop-area.highlight {
+    border-color: #6c63ff;
+    background-color: #f0f0ff;
+  }
+  
+  .submit-button {
+    background-color: #4ac4cf;
+    border: none;
+    color: black;
+    padding: 12px 24px;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    width: fit-content;
+    align-self: center;
+  }
+  
+  .submit-button:hover {
+    background-color: #3fabb5;
+  }
+  
+
+
 </style>
 
 
@@ -70,7 +125,7 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
               <div class="navbar-nav">
-                  <a class="navbar-brand"><b>Home</b></a>
+                <a class="navbar-brand" href="{%url 'clade_predictor:home'%}" ><b>Home</b></a>
                   <a class="nav-link">How to use</a> 
                   <a class="nav-link">Download</a>
                   <a class="nav-link">Publication</a>
