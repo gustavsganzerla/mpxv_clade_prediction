@@ -46,12 +46,13 @@ def home(request):
     model_subclade.load_model('/var/www/django_app/django_sample/models/xgb_model_subclade.json')
 
     model_partial_genomes_path = '/var/www/django_app/django_sample/models/v3-gpu_cnn_model.h5'
+    #model_partial_genomes_path = '/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/v3-gpu_cnn_model.h5'
     model_partial = load_model(model_partial_genomes_path)
     
 
     #model_clade.load_model('/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/xgb_clade.json')
     #model_subclade.load_model('/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/xgb_model_subclade.json')
-    #model_partial_genomes_path = '/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/v3-gpu_cnn_model.h5'
+    
     
 
     
@@ -103,7 +104,7 @@ def home(request):
                             else:
                                 clade = 'Clade 2b'
                     
-                    elif len(record.seq) < 192000:
+                    elif len(record.seq) < 192000 and len(record.seq)>1000:
                         classification_type = 'Partial'
                         n_windows = 0
                         predictions_array = []
@@ -128,6 +129,10 @@ def home(request):
                         elif counts2 > counts0 and counts2 > counts1:
                             clade = 'Clade 2b'
                         
+                    elif len(record.seq) < 1000:
+                        classification_type = 'Input too short'
+                        clade = 'Underdetermined'
+                    
                     output.append({
                             'id':record.id,
                             'prediction':clade,
