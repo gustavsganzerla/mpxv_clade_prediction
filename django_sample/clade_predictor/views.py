@@ -44,8 +44,8 @@ def home(request):
 
     model_clade.load_model('/var/www/django_app/django_sample/models/xgb_clade.json')
     model_subclade.load_model('/var/www/django_app/django_sample/models/xgb_model_subclade.json')
-    
-    model_partial_genomes_path = '/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/v3-gpu_cnn_model.h5'
+
+    model_partial_genomes_path = '/var/www/django_app/django_sample/models/v3-gpu_cnn_model.h5'
     model_partial = load_model(model_partial_genomes_path)
     
 
