@@ -42,16 +42,16 @@ def home(request):
     output = []
     n_seqs = 0
 
-    model_clade.load_model('/var/www/django_app/django_sample/models/xgb_clade.json')
-    model_subclade.load_model('/var/www/django_app/django_sample/models/xgb_model_subclade.json')
+    #model_clade.load_model('/var/www/django_app/django_sample/models/xgb_clade.json')
+    #model_subclade.load_model('/var/www/django_app/django_sample/models/xgb_model_subclade.json')
 
-    model_partial_genomes_path = '/var/www/django_app/django_sample/models/v3-gpu_cnn_model.h5'
-    #model_partial_genomes_path = '/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/v3-gpu_cnn_model.h5'
+    #model_partial_genomes_path = '/var/www/django_app/django_sample/models/v3-gpu_cnn_model.h5'
+    model_partial_genomes_path = '/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/v3-gpu_cnn_model.h5'
     model_partial = load_model(model_partial_genomes_path)
     
 
-    #model_clade.load_model('/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/xgb_clade.json')
-    #model_subclade.load_model('/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/xgb_model_subclade.json')
+    model_clade.load_model('/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/xgb_clade.json')
+    model_subclade.load_model('/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/xgb_model_subclade.json')
     
     
 
@@ -119,6 +119,7 @@ def home(request):
                             
                         ###here, predictions_array will have regular list
                         predictions_array = np.concatenate(predictions_array)
+                        print(predictions_array)
                         counts = np.bincount(predictions_array, minlength=3)
                         counts0, counts1, counts2 = counts[0], counts[1], counts[2]
 
@@ -128,6 +129,9 @@ def home(request):
                             clade = 'Clade 1b'
                         elif counts2 > counts0 and counts2 > counts1:
                             clade = 'Clade 2b'
+                        elif counts0 == counts1 or counts0 == counts2 or counts1 == counts2:
+                            clade = 'Undertermined'
+                        
                         
                     elif len(record.seq) < 1000:
                         classification_type = 'Input too short'
