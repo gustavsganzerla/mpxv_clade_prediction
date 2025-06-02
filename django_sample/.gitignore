@@ -1,5 +1,9 @@
 # Virtual environment
+<<<<<<< HEAD
 djangoenv/
+=======
+venv/
+>>>>>>> 6076a7a9e53506790ce6daff729cf18bea3f9a2d
 
 # Python cache files
 __pycache__/
