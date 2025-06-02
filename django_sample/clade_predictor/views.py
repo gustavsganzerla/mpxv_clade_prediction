@@ -233,3 +233,6 @@ def home(request):
 
     return render(request, 'clade_predictor/home.html',
                   context = {'form':form})
+
+def contact(request):
+    return render(request, 'clade_predictor/contact.html')
