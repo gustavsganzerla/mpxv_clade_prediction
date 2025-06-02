@@ -1,5 +1,5 @@
 # Virtual environment
-venv/
+djangoenv/
 
 # Python cache files
 __pycache__/
