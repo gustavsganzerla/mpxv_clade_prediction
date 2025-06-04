@@ -1,1 +1,30 @@
+# Virtual environment
 djangoenv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment variables
+.env
+
+# Django migration backups
+*.sqlite3
+
+# VS Code settings (if you use it)
+.vscode/
+
+# Mac system files
+.DS_Store
+
+# Compiled C extensions
+*.so
+
+# Static and media files (if generated locally)
+staticfiles/
+media/
+
+# Logs
+*.log
+
