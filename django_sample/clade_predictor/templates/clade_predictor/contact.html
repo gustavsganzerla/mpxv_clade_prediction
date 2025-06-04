@@ -2,9 +2,22 @@
 
 {% block content %}
 
-<div class='content'>
+<h1>Reach out to us!</h1>
 
-    <h1>Reach out to us</h1>
-</div>
+<div class="content-rectangle">
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+  
+      <div class="form-group">
+        {{ form.subject.label_tag }} {{ form.subject}}
+        {{ form.email.label_tag }} {{ form.email}}
+        {{ form.message.label_tag }} {{ form.message}}
+      </div>
+  
 
-{%endblock%}
+  
+      <button type="submit" class="submit-button">Send</button>
+    </form>
+  </div>
+  
+  {% endblock%}

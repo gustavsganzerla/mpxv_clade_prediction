@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from . forms import genomeForm
+from . forms import genomeForm, contactForm
 from io import StringIO
 from Bio import SeqIO
 from collections import Counter
@@ -10,6 +10,10 @@ import numpy as np
 import xgboost as xgb
 
 from tensorflow.keras.models import load_model
+
+
+from django.core.mail import EmailMessage, get_connection
+from django.conf import settings
 
 # views to handle data
 def generate_kmers(sequence, k):
@@ -235,4 +239,39 @@ def home(request):
                   context = {'form':form})
 
 def contact(request):
-    return render(request, 'clade_predictor/contact.html')
+    if request.method=='POST':
+        form = contactForm(request.POST)
+        if form.is_valid():
+            collected_data = form.cleaned_data
+            subject = collected_data.get('subject')
+            email = collected_data.get('email')
+            message = collected_data.get('message')
+
+            with get_connection(
+                host = settings.EMAIL_HOST,
+                port = settings.EMAIL_PORT,
+                username = settings.EMAIL_HOST_USER,
+                password = settings.EMAIL_HOST_PASSWORD,
+                use_ssl = settings.EMAIL_USE_SSL
+            ) as connection:
+                subject = "MPP_"+subject
+                email_from = settings.EMAIL_HOST_USER
+                recipient_list = ['sganzerlagustavo@gmail.com']
+                message = f"{message}\n{email}"
+
+                email = EmailMessage(
+                    subject,
+                    message,
+                    email_from,
+                    recipient_list
+                )
+                email.send()
+                return render(request, 'clade_predictor/contact_success.html')
+
+    else:
+        form = contactForm()
+
+    
+    return render(request, 'clade_predictor/contact.html',
+                  {'form':form})
+    
