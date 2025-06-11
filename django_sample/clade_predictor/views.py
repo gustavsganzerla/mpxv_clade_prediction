@@ -275,3 +275,5 @@ def contact(request):
     return render(request, 'clade_predictor/contact.html',
                   {'form':form})
     
+def how_to_use(request):
+    return render(request, 'clade_predictor/how_to_use.html')

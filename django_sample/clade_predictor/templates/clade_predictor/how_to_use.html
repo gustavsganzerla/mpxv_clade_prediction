@@ -1,0 +1,66 @@
+{% extends 'base.html'%}
+
+{% block content%}
+
+<div class="webserver-instructions" style="margin: 20px 0; font-family: sans-serif;">
+    <details>
+        <summary style="font-size: 1.2em; cursor: pointer; color: #4ac4cf; font-weight: bold;">
+            Web Server Instructions
+        </summary>
+        <div style="margin-top: 10px; padding: 10px; border-left: 3px solid #4ac4cf; background-color: #f9f9f9;">
+            <p><strong>Upload files</strong></p>
+            <pre style="background: #eee; padding: 8px; border-radius: 4px;">Drag/drop or manually upload your .fasta file containing your sequences. Multiple files are accepted.</pre>
+            <p><strong>Copy the text content of your files</strong></p>
+            <pre style="background: #eee; padding: 8px; border-radius: 4px;">Copy all the content of your .fasta file containing your sequences and paste it to the <b>Genome text</b> box.</pre>
+            <p><strong>Predict</strong></p>
+            <pre style="background: #eee; padding: 8px; border-radius: 4px;">Click on the <b>Predict</b> button. You will be directed to a webpage containing the results.</pre>
+
+    </details>
+</div>
+
+<div class="docker-instructions" style="margin: 20px 0; font-family: sans-serif;">
+    <details>
+      <summary style="font-size: 1.2em; cursor: pointer; color: #4ac4cf; font-weight: bold;">
+        Docker Usage Instructions
+      </summary>
+      <div style="margin-top: 10px; padding: 10px; border-left: 3px solid #4ac4cf; background-color: #f9f9f9;">
+        <p><strong>Pull the Docker image:</strong></p>
+        <pre style="background: #eee; padding: 8px; border-radius: 4px;">docker pull gustavosganzerla/ai-clade:latest</pre>
+  
+        <p><strong>Run with a directory of FASTA files:</strong></p>
+        <pre style="background: #eee; padding: 8px; border-radius: 4px;">docker run --rm -v /local/path/to/fasta:/data gustavosganzerla/ai-clade:latest /data</pre>
+  
+        <p><strong>Run with output directory:</strong></p>
+        <pre style="background: #eee; padding: 8px; border-radius: 4px;">docker run --rm -v /local/path/to/fasta:/data -v /local/path/to/results:/results gustavosganzerla/ai-clade:latest /data --output /results</pre>
+  
+        <p><strong>Check results:</strong></p>
+        <pre style="background: #eee; padding: 8px; border-radius: 4px;">/local/path/to/results/results.csv</pre>
+      </div>
+    </details>
+  </div>
+  
+
+  <div class="download-instructions" style="margin: 20px 0; font-family: sans-serif;">
+    <details>
+      <summary style="font-size: 1.2em; cursor: pointer; color: #4ac4cf; font-weight: bold;">
+        Download the pre-trained models.
+      </summary>
+      <div style="margin-top: 10px; padding: 10px; border-left: 3px solid #4ac4cf; background-color: #f9f9f9;">
+        <p><strong>Complete Genomes</strong></p>
+        <pre style="background: #eee; padding: 8px; border-radius: 4px;">Clade I vs Clade II (XGBoost)<p><a href="https://github.com/gustavsganzerla/mpxv_clade_prediction/blob/main/django_sample/models/xgb_clade.json" target="_blank" style="color: #4ac4cf; text-decoration: none;">Access (click on the <i class="fas fa-download" style="margin-left: 4px; color: #4ac4cf;"></i> icon to download)</a></pre>
+        <pre style="background: #eee; padding: 8px; border-radius: 4px;">Clade Ia vs Clade Ib (XGBoost)<p><a href="https://github.com/gustavsganzerla/mpxv_clade_prediction/blob/main/django_sample/models/xgb_model_subclade.json" target="_blank" style="color: #4ac4cf; text-decoration: none;">Access (click on the <i class="fas fa-download" style="margin-left: 4px; color: #4ac4cf;"></i> icon to download)</a></pre>
+            
+    </div>
+    <div style="margin-top: 10px; padding: 10px; border-left: 3px solid #4ac4cf; background-color: #f9f9f9;">
+        <p><strong>Partial Genomes</strong></p>
+        <pre style="background: #eee; padding: 8px; border-radius: 4px;">Clade Ia vs Clade Ib vs Clade IIb (CNN)<p><a href="https://github.com/gustavsganzerla/mpxv_clade_prediction/blob/main/django_sample/models/v3-gpu_cnn_model.h5" target="_blank" style="color: #4ac4cf; text-decoration: none;">Access (click on the <i class="fas fa-download" style="margin-left: 4px; color: #4ac4cf;"></i> icon to download)</a></pre>
+    </div>
+
+    
+        
+
+        
+
+        
+
+{% endblock %}
