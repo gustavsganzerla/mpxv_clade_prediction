@@ -25,13 +25,13 @@
       </summary>
       <div style="margin-top: 10px; padding: 10px; border-left: 3px solid #4ac4cf; background-color: #f9f9f9;">
         <p><strong>Pull the Docker image:</strong></p>
-        <pre style="background: #eee; padding: 8px; border-radius: 4px;">docker pull gustavosganzerla/ai-clade:latest</pre>
+        <pre style="background: #eee; padding: 8px; border-radius: 4px;">docker pull sganzg/ai-clade:latest</pre>
   
         <p><strong>Run with a directory of FASTA files:</strong></p>
-        <pre style="background: #eee; padding: 8px; border-radius: 4px;">docker run --rm -v /local/path/to/fasta:/data gustavosganzerla/ai-clade:latest /data</pre>
+        <pre style="background: #eee; padding: 8px; border-radius: 4px;">docker run --rm -v /local/path/to/fasta:/data sganzg/ai-clade:latest /data</pre>
   
         <p><strong>Run with output directory:</strong></p>
-        <pre style="background: #eee; padding: 8px; border-radius: 4px;">docker run --rm -v /local/path/to/fasta:/data -v /local/path/to/results:/results gustavosganzerla/ai-clade:latest /data --output /results</pre>
+        <pre style="background: #eee; padding: 8px; border-radius: 4px;">docker run --rm -v /local/path/to/fasta:/data -v /local/path/to/results:/results sganzg/ai-clade:latest /data --output /results</pre>
   
         <p><strong>Check results:</strong></p>
         <pre style="background: #eee; padding: 8px; border-radius: 4px;">/local/path/to/results/results.csv</pre>
