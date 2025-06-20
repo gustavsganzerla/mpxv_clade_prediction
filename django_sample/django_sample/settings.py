@@ -27,7 +27,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['172-105-23-184.ip.linodeusercontent.com', 'localhost', '127.0.0.1', '172.105.23.184']
+ALLOWED_HOSTS = ['172-105-23-184.ip.linodeusercontent.com', 'localhost', '127.0.0.1', '172.105.23.184', 'ai-clade.microbiologyandimmunology.dal.ca']
 
 
 # Application definition
