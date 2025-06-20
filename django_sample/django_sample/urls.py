@@ -16,9 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('clade_predictor/', include('clade_predictor.urls'))
+    path('clade_predictor/', include('clade_predictor.urls')),
+    path('', RedirectView.as_view(url='/clade_predictor/home', permanent=False))
 ]
