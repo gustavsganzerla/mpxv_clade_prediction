@@ -115,8 +115,8 @@ def home(request):
                         classification_type = 'Partial (CNN)'
                         X = []
 
-                        for start in range(0, len(sequence) - WINDOW_SIZE + 1, STEP_SIZE):
-                            window_seq = sequence[start:start+WINDOW_SIZE]
+                        for start in range(0, len(seq) - WINDOW_SIZE + 1, STEP_SIZE):
+                            window_seq = seq[start:start+WINDOW_SIZE]
 
                             if len(window_seq) == WINDOW_SIZE:
                                 X.append(one_hot_encode(window_seq))
