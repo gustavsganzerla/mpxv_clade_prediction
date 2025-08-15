@@ -174,7 +174,7 @@ def home(request):
                 uploaded_file_data = uploaded_file.read().decode('utf-8')
                 uploaded_file_io = StringIO(uploaded_file_data)
 
-                for record in SeqIO.parse(StringIO(genome_text), 'fasta'):
+                for record in SeqIO.parse(uploaded_file_io, 'fasta'):
                     seq = record.seq
                     n_seqs +=1
                     clade = ''
