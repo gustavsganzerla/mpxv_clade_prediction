@@ -8,6 +8,7 @@ import itertools
 import pandas as pd
 import numpy as np
 import xgboost as xgb
+from itertools import product
 
 from tensorflow.keras.models import load_model
 
@@ -16,27 +17,31 @@ from django.core.mail import EmailMessage, get_connection
 from django.conf import settings
 
 # views to handle data
-def generate_kmers(sequence, k):
-    sequence = ''.join([base for base in sequence if base in 'ATCG'])
+bases = ['A', 'C', 'G', 'T']
+trimer_list = [''.join(p) for p in product(bases, repeat=3)]
+WINDOW_SIZE = 1000
+STEP_SIZE = 500
+NUC_DICT = {'A': [1,0,0,0],
+            'T': [0,1,0,0],
+            'C': [0,0,1,0],
+            'G': [0,0,0,1]}
+###functions to process input data
 
-    kmers = [sequence[i:i+k] for i in range(len(sequence)-k+1)]
-    return Counter(kmers)
+def trinuc_freq(seq):
+    seq = seq.upper()
+    counts = {tri: 0 for tri in trimer_list}
+    total = len(seq) - 2
+    for i in range(total):
+        tri = seq[i:i+3]
+        if all(b in bases for b in tri):
+            counts[tri] += 1
+    freqs = np.array([counts[tri]/total if total > 0 else 0 for tri in trimer_list])
+    return freqs
 
 
-def one_hot_encoding(seq):
-    mapping = {'A':[1,0,0,0],
-               'C':[0,1,0,0],
-               'G':[0,0,1,0],
-               'T':[0,0,0,1]}
+def one_hot_encode(seq):
+    return np.array([NUC_DICT.get(base.upper(), [0,0,0,0]) for base in seq])
 
-    return np.array([mapping.get(base, [0,0,0,0]) for base in seq])
-
-def split_genomes(sequence, window_size=1000, step_size=1000):
-    windows = []
-    for start in range(0, len(sequence) - window_size+1, step_size):
-        window = sequence[start:start+window_size]
-        windows.append(str(window))
-    return windows
 
 
 # Create your views here.
@@ -46,16 +51,26 @@ def home(request):
     output = []
     n_seqs = 0
 
-    model_clade.load_model('/var/www/django_app/django_sample/models/xgb_clade.json')
-    model_subclade.load_model('/var/www/django_app/django_sample/models/xgb_model_subclade.json')
+    ###MODELS
+    ###COMPLETE GENOME
+    MODEL_COMPLETE_CLADE_PATH = '/var/www/django_app/django_sample/models/complete_clade.json'
+    MODEL_COMPLETE_SUBCLADE_PATH = '/var/www/django_app/django_sample/models/complete_subclade.json'
 
-    model_partial_genomes_path = '/var/www/django_app/django_sample/models/v3-gpu_cnn_model.h5'
-    #model_partial_genomes_path = '/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/v3-gpu_cnn_model.h5'
-    model_partial = load_model(model_partial_genomes_path)
+    model_complete_clade = xgb.XGBClassifier()
+    model_complete_subclade = xgb.XGBClassifier()
+
+    model_complete_clade.load_model(MODEL_COMPLETE_CLADE_PATH)
+    model_complete_subclade.load_model(MODEL_COMPLETE_SUBCLADE_PATH)
+
+    ###PARTIAL GENOME
+    MODEL_PARTIAL_CLADE_PATH = '/var/www/django_app/django_sample/models/partial_clade.h5'
+    MODEL_PARTIAL_SUBCLADE_PATH = '/var/www/django_app/django_sample/models/partial_subclade.h5'
+
+    model_partial_clade = load_model(MODEL_PARTIAL_CLADE_PATH)
+    model_partial_subclade = load_model(MODEL_PARTIAL_SUBCLADE_PATH)
     
 
-    #model_clade.load_model('/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/xgb_clade.json')
-    #model_subclade.load_model('/Users/gustavosganzerla/mpxv_clade_prediction/django_sample/models/xgb_model_subclade.json')
+
     
     
     if request.method == 'POST':
@@ -73,62 +88,67 @@ def home(request):
             ###here I am getting data from the text box in the website
             if genome_text:
                 for record in SeqIO.parse(StringIO(genome_text), 'fasta'):
+                    seq = record.seq
                     n_seqs +=1
+                    clade = ''
 
                     ###classification with xgboost of complete genomes
-                    if len(record.seq) >= 192000:
-                        classification_type = 'Complete'
-                        kmer_counts = generate_kmers(record.seq, 3)
-                        features = [kmer_counts.get(kmer, 0) for kmer in all_kmers]
-
-                        X = np.array(features).reshape(1,-1)
-
+                    if len(seq) >= 188000:
+                        classification_type = 'Complete (XGBoost)'
                         
-                        y_pred_proba = model_clade.predict_proba(X)
-                        elements = y_pred_proba.tolist()
-                        
-                        for inner_list in elements:
-                            clade = ''
-                            if inner_list[0] > inner_list[1]:
-                                clade = 'Clade 1'
-                                y_pred_proba = model_subclade.predict_proba(X)
-                                elements_subclade = y_pred_proba.tolist()
+                        freq_vector = trinuc_freq(seq)
+                        df_features = pd.DataFrame([freq_vector], columns=trimer_list)
 
-                                for inner_list_subclade in elements_subclade:
-                                    if inner_list_subclade[0] > inner_list_subclade[1]:
-                                        clade += 'a'
-                                    else:
-                                        clade += 'b'
+                        pred_clade = model_complete_clade.predict(df_features)[0]
+
+                        if pred_clade == 1:
+                            clade = 'Subclade IIb'
+                        else:
+                            pred_subclade = model_complete_subclade.predict(df_features)[0]
+
+                            if pred_subclade == 0:
+                                clade = 'Subclade Ia'
                             else:
-                                clade = 'Clade 2b'
+                                clade = 'Subclade Ib'
                     
                     elif len(record.seq) < 192000 and len(record.seq)>1000:
-                        classification_type = 'Partial'
-                        n_windows = 0
-                        predictions_array = []
-                        for window in split_genomes(str(record.seq)):
-                            X_window = one_hot_encoding(window).flatten()
-                            X_window = np.array(X_window)
-                            X_window = X_window.reshape(-1, 1000, 4)
-                            n_windows+=1
-                            y_pred = model_partial.predict(X_window)
-                            ###here, predictions_array will have a list of lists
-                            predictions_array.append(np.argmax(y_pred, axis=1))
-                            
-                        ###here, predictions_array will have regular list
-                        predictions_array = np.concatenate(predictions_array)
-                        print(predictions_array)
-                        counts = np.bincount(predictions_array, minlength=3)
-                        counts0, counts1, counts2 = counts[0], counts[1], counts[2]
+                        classification_type = 'Partial (CNN)'
+                        X = []
 
-                        if counts0 > counts1 and counts0 > counts2:
-                            clade = 'Clade 1a'
-                        elif counts1 > counts0 and counts1 > counts2:
-                            clade = 'Clade 1b'
-                        elif counts2 > counts0 and counts2 > counts1:
-                            clade = 'Clade 2b'
-                        elif counts0 == counts1 or counts0 == counts2 or counts1 == counts2:
-                            clade = 'Undertermined'
+                        for start in range(0, len(seq) - WINDOW_SIZE + 1, STEP_SIZE):
+                            window_seq = seq[start:start+WINDOW_SIZE]
+
+                            if len(seq) == WINDOW_SIZE:
+                                X.append(one_hot_encode(window_seq))
+                        if X:
+                            X = np.array(X)
+
+                            pred_clade_array = model_partial_clade.predict(X)
+                            pred_clade_array = np.argmax(pred_clade_array, axis=1)
+
+                            clade1_votes = np.sum(pred_clade_array==0)
+                            clade2_votes = np.sum(pred_clade_array==1)
+
+                            if clade2_votes == clade1_votes:
+                                clade = 'Undetermined'
+                            if  clade2_votes > clade1_votes:
+                                clade = 'Subclade IIb'
+
+                            else:
+                                pred_subclade_array = model_partial_subclade.predict(X)
+                                pred_subclade_array = np.argmax(pred_subclade_array, axis=1)
+
+                                clade1a_votes = np.sum(pred_subclade_array==0)
+                                clade1b_votes = np.sum(pred_subclade_array==1)
+
+                                if clade1a_votes == clade1b_votes:
+                                    clade = 'Undetermined'
+                                if clade1a_votes > clade1b_votes:
+                                    clade = 'Subclade Ia'
+                                else:
+                                    clade = 'Subclade Ib'
+                                
+
                         
                         
                     elif len(record.seq) < 1000:
@@ -154,63 +174,68 @@ def home(request):
                 uploaded_file_data = uploaded_file.read().decode('utf-8')
                 uploaded_file_io = StringIO(uploaded_file_data)
 
-                for record in SeqIO.parse(uploaded_file_io, 'fasta'):
+                for record in SeqIO.parse(StringIO(genome_text), 'fasta'):
+                    seq = record.seq
                     n_seqs +=1
+                    clade = ''
 
                     ###classification with xgboost of complete genomes
-                    if len(record.seq) >= 192000:
-                        classification_type = 'Complete'
-                        kmer_counts = generate_kmers(record.seq, 3)
-                        features = [kmer_counts.get(kmer, 0) for kmer in all_kmers]
-
-                        X = np.array(features).reshape(1,-1)
-
+                    if len(seq) >= 188000:
+                        classification_type = 'Complete (XGBoost)'
                         
-                        y_pred_proba = model_clade.predict_proba(X)
-                        elements = y_pred_proba.tolist()
-                        
-                        for inner_list in elements:
-                            clade = ''
-                            if inner_list[0] > inner_list[1]:
-                                clade = 'Clade 1'
-                                y_pred_proba = model_subclade.predict_proba(X)
-                                elements_subclade = y_pred_proba.tolist()
+                        freq_vector = trinuc_freq(seq)
+                        df_features = pd.DataFrame([freq_vector], columns=trimer_list)
 
-                                for inner_list_subclade in elements_subclade:
-                                    if inner_list_subclade[0] > inner_list_subclade[1]:
-                                        clade += 'a'
-                                    else:
-                                        clade += 'b'
+                        pred_clade = model_complete_clade.predict(df_features)[0]
+
+                        if pred_clade == 1:
+                            clade = 'Subclade IIb'
+                        else:
+                            pred_subclade = model_complete_subclade.predict(df_features)[0]
+
+                            if pred_subclade == 0:
+                                clade = 'Subclade Ia'
                             else:
-                                clade = 'Clade 2b'
+                                clade = 'Subclade Ib'
                     
                     elif len(record.seq) < 192000 and len(record.seq)>1000:
-                        classification_type = 'Partial'
-                        n_windows = 0
-                        predictions_array = []
-                        for window in split_genomes(str(record.seq)):
-                            X_window = one_hot_encoding(window).flatten()
-                            X_window = np.array(X_window)
-                            X_window = X_window.reshape(-1, 1000, 4)
-                            n_windows+=1
-                            y_pred = model_partial.predict(X_window)
-                            ###here, predictions_array will have a list of lists
-                            predictions_array.append(np.argmax(y_pred, axis=1))
-                            
-                        ###here, predictions_array will have regular list
-                        predictions_array = np.concatenate(predictions_array)
-                        print(predictions_array)
-                        counts = np.bincount(predictions_array, minlength=3)
-                        counts0, counts1, counts2 = counts[0], counts[1], counts[2]
+                        classification_type = 'Partial (CNN)'
+                        X = []
 
-                        if counts0 > counts1 and counts0 > counts2:
-                            clade = 'Clade 1a'
-                        elif counts1 > counts0 and counts1 > counts2:
-                            clade = 'Clade 1b'
-                        elif counts2 > counts0 and counts2 > counts1:
-                            clade = 'Clade 2b'
-                        elif counts0 == counts1 or counts0 == counts2 or counts1 == counts2:
-                            clade = 'Undertermined'
+                        for start in range(0, len(seq) - WINDOW_SIZE + 1, STEP_SIZE):
+                            window_seq = seq[start:start+WINDOW_SIZE]
+
+                            if len(seq) == WINDOW_SIZE:
+                                X.append(one_hot_encode(window_seq))
+                        if X:
+                            X = np.array(X)
+
+                            pred_clade_array = model_partial_clade.predict(X)
+                            pred_clade_array = np.argmax(pred_clade_array, axis=1)
+
+                            clade1_votes = np.sum(pred_clade_array==0)
+                            clade2_votes = np.sum(pred_clade_array==1)
+
+                            if clade2_votes == clade1_votes:
+                                clade = 'Undetermined'
+                            if  clade2_votes > clade1_votes:
+                                clade = 'Subclade IIb'
+
+                            else:
+                                pred_subclade_array = model_partial_subclade.predict(X)
+                                pred_subclade_array = np.argmax(pred_subclade_array, axis=1)
+
+                                clade1a_votes = np.sum(pred_subclade_array==0)
+                                clade1b_votes = np.sum(pred_subclade_array==1)
+
+                                if clade1a_votes == clade1b_votes:
+                                    clade = 'Undetermined'
+                                if clade1a_votes > clade1b_votes:
+                                    clade = 'Subclade Ia'
+                                else:
+                                    clade = 'Subclade Ib'
+                                
+
                         
                         
                     elif len(record.seq) < 1000:
